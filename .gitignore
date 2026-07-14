@@ -1,0 +1,43 @@
+# ============================================
+# Secretos y credenciales — NUNCA versionar
+# ============================================
+.env
+.env.*
+!.env.example
+credentials/*
+!credentials/.gitignore
+
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+
+# ============================================
+# Herramientas / caché
+# ============================================
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# ============================================
+# Editores / SO
+# ============================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
