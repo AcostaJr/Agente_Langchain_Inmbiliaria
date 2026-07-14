@@ -11,6 +11,7 @@ import uuid
 import requests
 from dotenv import load_dotenv, find_dotenv
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 # Cargar variables de entorno
@@ -120,6 +121,26 @@ app = FastAPI(
     title="DataBot - Agente IA con Chatwoot",
     description="Webhook para integrar el Agente D con Chatwoot",
     version="1.0.0"
+)
+
+# ============================================
+# CORS — orígenes permitidos (ej. la instancia de Chatwoot)
+# Configurable por env CORS_ALLOW_ORIGINS (lista separada por comas).
+# Los navegadores envían el Origin sin barra final ni ruta, así que se normaliza.
+# ============================================
+_DEFAULT_CORS_ORIGINS = "https://herramientas-chatwoot.omd6ow.easypanel.host"
+CORS_ALLOW_ORIGINS = [
+    o.strip().rstrip("/")
+    for o in os.getenv("CORS_ALLOW_ORIGINS", _DEFAULT_CORS_ORIGINS).split(",")
+    if o.strip()
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=CORS_ALLOW_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
