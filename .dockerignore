@@ -1,0 +1,58 @@
+# ============================================================
+# Secretos y config local — se inyectan en RUNTIME, NUNCA en la imagen
+# (la imagen puede terminar en un registry público con `docker push`)
+# ============================================================
+.env
+.env.*
+!.env.example
+credentials/*
+!credentials/.gitignore
+
+# ============================================
+# Git
+# ============================================
+.git/
+.gitignore
+
+# ============================================
+# Python
+# ============================================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Entornos virtuales
+.venv/
+venv/
+env/
+ENV/
+
+# ============================================
+# Editor / IDE / SO
+# ============================================
+.vscode/
+.idea/
+*.code-workspace
+.DS_Store
+Thumbs.db
+
+# ============================================
+# Notebooks, logs y tests
+# ============================================
+*.ipynb
+.ipynb_checkpoints/
+*.log
+logs/
+tests/
+test_*.py
+*_test.py
+
+# ============================================
+# Archivos de deploy y docs pesadas (no necesarios dentro de la imagen)
+# ============================================
+LangChain-AgenteIA-MultiTool-Qdrant-Archivos-para-Deploy/
+Dockerfile
+.dockerignore
+# rag/data/  # descomenta si NO vas a correr la ingesta (rag/rag.py) dentro del contenedor
