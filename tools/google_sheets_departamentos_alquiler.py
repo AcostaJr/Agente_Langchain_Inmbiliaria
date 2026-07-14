@@ -7,6 +7,9 @@ Requisitos previos:
 1. Crear un Service Account en Google Cloud y descargar su clave JSON.
 2. Habilitar la API "Google Sheets API" en el proyecto de Google Cloud.
 3. Compartir el Google Sheet con el email del service account (permiso Lector).
+4. Proveer la clave: variable de entorno GOOGLE_SHEETS_SERVICE_ACCOUNT_KEY (JSON
+   completo, recomendado para despliegue) o el archivo GOOGLE_SHEETS_CREDENTIALS_FILE
+   (ver tools/google_sheets_auth.py).
 
 Autor: Ing. Kevin Inofuente Colque - DataPath
 """
@@ -16,25 +19,15 @@ import os
 from dotenv import load_dotenv, find_dotenv
 from langchain_core.tools import tool
 
-import gspread
+from tools.google_sheets_auth import get_client
 
 load_dotenv(find_dotenv())
-
-# Raíz del proyecto (este archivo vive en tools/)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # ============================================
 # CONFIGURACIÓN DE GOOGLE SHEETS
 # ============================================
 SPREADSHEET_ID = os.getenv("GOOGLE_SHEETS_SPREADSHEET_ID")
-CREDENTIALS_FILE = os.getenv(
-    "GOOGLE_SHEETS_CREDENTIALS_FILE", "credentials/google-service-account.json"
-)
 WORKSHEET_NAME = os.getenv("GOOGLE_SHEETS_WORKSHEET", "")  # vacío = primera hoja
-
-# Ruta de la clave JSON resuelta contra la raíz del proyecto (portable)
-if not os.path.isabs(CREDENTIALS_FILE):
-    CREDENTIALS_FILE = os.path.join(BASE_DIR, CREDENTIALS_FILE)
 
 if not SPREADSHEET_ID:
     raise ValueError(
@@ -42,18 +35,8 @@ if not SPREADSHEET_ID:
         "Es el ID del Google Sheet (la parte entre /d/ y /edit de la URL)."
     )
 
-if not os.path.exists(CREDENTIALS_FILE):
-    raise ValueError(
-        f"❌ No se encontró la clave JSON del service account: {CREDENTIALS_FILE}\n"
-        "Descárgala desde Google Cloud (IAM > Service Accounts > Keys) y define\n"
-        "GOOGLE_SHEETS_CREDENTIALS_FILE en .env (ruta relativa al proyecto o absoluta)."
-    )
-
-# Solo lectura: el agente nunca modifica la hoja
-_SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
-
-# Cliente perezoso: la clave se valida al importar, pero la conexión
-# a Google se abre recién en la primera consulta.
+# Cliente perezoso: las credenciales se validan al importar (en
+# tools.google_sheets_auth); la conexión a Google se abre en la primera consulta.
 _client = None
 
 
@@ -61,7 +44,7 @@ def _get_worksheet():
     """Devuelve la hoja de trabajo configurada (autentica en la primera llamada)."""
     global _client
     if _client is None:
-        _client = gspread.service_account(filename=CREDENTIALS_FILE, scopes=_SCOPES)
+        _client = get_client()
     spreadsheet = _client.open_by_key(SPREADSHEET_ID)
     if WORKSHEET_NAME:
         return spreadsheet.worksheet(WORKSHEET_NAME)
